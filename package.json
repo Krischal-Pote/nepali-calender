@@ -1,5 +1,9 @@
 {
   "name": "nepali-calender",
+  "author": {
+    "name": "Krischal Om Pote",
+    "email": "crischal1234@gmail.com"
+  },
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -11,9 +15,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.0.6",
-    "nepali-date-converter": "^3.3.3",
     "react": "^19.0.0",
-    "react-calendar": "^5.1.0",
     "react-dom": "^19.0.0",
     "zustand": "^5.0.3"
   },
