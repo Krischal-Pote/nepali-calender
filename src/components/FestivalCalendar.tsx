@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import "react-calendar/dist/Calendar.css";
 import { create } from "zustand";
 
 interface Festival {
