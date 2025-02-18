@@ -1,10 +1,10 @@
 import "./App.css";
-import FestivalCalendar from "./components/FestivalCalendar";
+import LandingPage from "./components/LandingPage";
 
 function App() {
   return (
     <>
-      <FestivalCalendar />
+      <LandingPage />
     </>
   );
 }

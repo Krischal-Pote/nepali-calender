@@ -1,41 +1,8 @@
 import { useState, useEffect } from "react";
-import { create } from "zustand";
+import useCalendarStore from "../store/useCalendarStore";
+import CustomCalendar from "./CustomCalender";
 
-interface Festival {
-  np: string;
-  en: string;
-  tithi: string;
-  event: string;
-  day: number;
-  specialday: string;
-  holiday: boolean;
-  month: string;
-}
-
-interface Store {
-  festivals: Festival[];
-  setFestivals: (festivals: Festival[]) => void;
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  notes: Record<string, string>;
-  setNote: (date: string, note: string) => void;
-}
-
-const useStore = create<Store>((set) => ({
-  festivals: [],
-  setFestivals: (festivals) => set({ festivals }),
-  searchQuery: "",
-  setSearchQuery: (query) => set({ searchQuery: query }),
-  notes: JSON.parse(localStorage.getItem("notes") || "{}"),
-  setNote: (date, note) =>
-    set((state) => {
-      const updatedNotes = { ...state.notes, [date]: note };
-      localStorage.setItem("notes", JSON.stringify(updatedNotes));
-      return { notes: updatedNotes };
-    }),
-}));
-
-const FestivalCalendar = () => {
+const LandingPage = () => {
   const {
     festivals,
     setFestivals,
@@ -43,7 +10,7 @@ const FestivalCalendar = () => {
     setSearchQuery,
     notes,
     setNote,
-  } = useStore();
+  } = useCalendarStore();
   const [view, setView] = useState<"calendar" | "list">("calendar");
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [noteInput, setNoteInput] = useState("");
@@ -59,12 +26,11 @@ const FestivalCalendar = () => {
         );
         const data = await response.json();
 
-        const filteredFestivals: Festival[] = ["Ashwin", "Kartik"].flatMap(
-          (month) =>
-            (data[month] || []).map((day: any) => ({
-              ...day,
-              month,
-            }))
+        const filteredFestivals = ["Ashwin", "Kartik"].flatMap((month) =>
+          (data[month] || []).map((day: any) => ({
+            ...day,
+            month,
+          }))
         );
 
         setFestivals(filteredFestivals);
@@ -95,9 +61,15 @@ const FestivalCalendar = () => {
   };
   const filteredFestivals = festivals.filter((festival) => {
     const query = searchQuery.toLowerCase();
-    const eventName = festival.event.toLowerCase();
+    const eventNameNp = festival.event.toLowerCase();
+    const eventNameEn = festival.en.toLowerCase();
     const dateString = `${festival.month.toLowerCase()} ${festival.day}`;
-    return eventName.includes(query) || dateString.includes(query);
+
+    return (
+      eventNameNp.includes(query) ||
+      eventNameEn.includes(query) ||
+      dateString.includes(query)
+    );
   });
   return (
     <div className="p-4 max-w-4xl mx-auto w-full">
@@ -140,75 +112,57 @@ const FestivalCalendar = () => {
         <p className="text-center">Loading festival data...</p>
       ) : view === "calendar" ? (
         ["Ashwin", "Kartik"].map((month) => (
-          <div key={month} className="mb-6">
-            <h2 className="text-xl font-semibold mb-2">{month}</h2>
-
-            <div className="grid grid-cols-7 gap-2 text-center text-sm">
-              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-                <div key={day} className="font-bold hidden md:block">
-                  {day}
-                </div>
-              ))}
-
-              {getDaysInMonth(month).map((day, index) => (
-                <div
-                  key={index}
-                  className={`p-2 border rounded-lg cursor-pointer text-xs sm:text-sm ${
-                    day?.holiday
-                      ? "bg-red-100 text-red-600"
-                      : day.specialday
-                      ? "bg-yellow-100"
-                      : "bg-white"
-                  }`}
-                  onClick={() => handleDateClick(`${month}-${day?.np}`)}
-                >
-                  <p className="font-semibold">{day?.np}</p>
-                  <p className="text-xs break-all">{day?.event}</p>
-                  <p className="flex justify-end">{day?.en}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+          <CustomCalendar
+            key={month}
+            month={month}
+            getDaysInMonth={getDaysInMonth}
+            handleDateClick={handleDateClick}
+          />
         ))
       ) : (
         <ul className="space-y-2">
           {filteredFestivals.length > 0 ? (
-            filteredFestivals.map((festival) => (
-              <li
-                key={`${festival.month}-${festival.day}`}
-                className={`p-3 rounded-lg border ${
-                  festival.holiday ? "bg-red-50 border-red-200" : "bg-white"
-                }`}
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p
-                      className={`font-semibold ${
-                        festival.holiday ? "text-red-600" : ""
-                      }`}
-                    >
-                      {festival.event}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      {festival.np} ({festival.en})
-                    </p>
+            filteredFestivals
+              .filter((festival) => festival.event)
+              .map((festival, index) => (
+                <li
+                  key={`${festival.month}-${festival.day}-${index}`}
+                  className={`p-3 rounded-lg border ${
+                    festival.holiday ? "bg-red-50 border-red-200" : "bg-white"
+                  }`}
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p
+                        className={`font-semibold ${
+                          festival.holiday ? "text-red-600" : ""
+                        }`}
+                      >
+                        {festival.event}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {festival.np} ({festival.en})
+                      </p>
+                    </div>
+                    <span className="text-sm text-gray-500 whitespace-nowrap">
+                      {festival.month}{" "}
+                      <p className="capitalize">{festival.day}</p>
+                    </span>
                   </div>
-                  <span className="text-sm text-gray-500 whitespace-nowrap">
-                    {festival.month} {festival.day}
-                  </span>
-                </div>
-                {festival.tithi && (
-                  <p className="text-xs mt-1 text-gray-500">{festival.tithi}</p>
-                )}
-              </li>
-            ))
+                  {festival.tithi && (
+                    <p className="text-xs mt-1 text-gray-500">
+                      {festival.tithi}
+                    </p>
+                  )}
+                </li>
+              ))
           ) : (
             <p className="text-center text-gray-500">No festivals found.</p>
           )}
         </ul>
       )}
       {selectedDate && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
+        <div className="fixed inset-0 flex items-center justify-center bg-[rgba(0,0,0,0.4)] p-4">
           <div className="bg-white p-4 rounded shadow-lg w-full max-w-md">
             <h2 className="text-lg font-bold mb-2">
               Add Note for {selectedDate}
@@ -240,4 +194,4 @@ const FestivalCalendar = () => {
   );
 };
 
-export default FestivalCalendar;
+export default LandingPage;
