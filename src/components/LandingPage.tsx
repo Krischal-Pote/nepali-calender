@@ -11,6 +11,7 @@ const LandingPage = () => {
     notes,
     setNote,
   } = useCalendarStore();
+  console.log("festivals", festivals);
   const [view, setView] = useState<"calendar" | "list">("calendar");
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [noteInput, setNoteInput] = useState("");
@@ -67,7 +68,7 @@ const LandingPage = () => {
 
     return (
       eventNameNp.includes(query) ||
-      eventNameEn.includes(query) ||
+      
       dateString.includes(query)
     );
   });

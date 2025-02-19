@@ -5,6 +5,7 @@ interface Day {
   np: string;
   en: string;
   event: string;
+  tithi: string;
   specialday?: string;
   holiday?: boolean;
 }
@@ -40,9 +41,11 @@ const CustomCalendar: React.FC<MonthCalendarProps> = ({
                   : "bg-white"
               }`}
               onClick={() => handleDateClick(dateKey)}
+              title="Click to add note"
             >
               <p className="font-semibold">{day?.np}</p>
-              <p className="text-xs">{day?.event}</p>
+              <p className="text-sm">{day?.event}</p>
+              <p className="text-xs">{day?.tithi}</p>
               <p className="flex justify-end">{day?.en}</p>
               {hasNote && (
                 <span className="absolute top-1 right-1 text-blue-500 text-lg">
