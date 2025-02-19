@@ -63,14 +63,10 @@ const LandingPage = () => {
   const filteredFestivals = festivals.filter((festival) => {
     const query = searchQuery.toLowerCase();
     const eventNameNp = festival.event.toLowerCase();
-    const eventNameEn = festival.en.toLowerCase();
+    // const eventNameEn = festival.en.toLowerCase();
     const dateString = `${festival.month.toLowerCase()} ${festival.day}`;
 
-    return (
-      eventNameNp.includes(query) ||
-      
-      dateString.includes(query)
-    );
+    return eventNameNp.includes(query) || dateString.includes(query);
   });
   return (
     <div className="p-4 max-w-4xl mx-auto w-full">
